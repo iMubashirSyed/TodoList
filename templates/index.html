@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Django TodoList</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+</head>
+
+  <body>
+
+    {% comment %} Navbar {% endcomment %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary"  data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">TodoList</a>
+        
+        <a class="navbar-brand" href="{% url 'logout'%}">Logout</a>
+{% comment %} 
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button> {% endcomment %}
+      </div>
+    </nav>
+
+    {% comment %} contains User input fields: title, description, and submit btn etc {% endcomment %}
+  <div class="container">
+      <div class="row justify-content-center">
+          <div class="col-sm-7">
+            {%comment%} 
+            The method is POST bcz GET method cant take big inputs cause everything that it would take as an input
+            can be seen in the url and the url has a limit. It cant be too long. {%endcomment%}
+              <form action="{% url 'create_todo' %}" method="POST"> 
+                  {%  csrf_token %} 
+                <div class="form-group">
+                  <label for="title">Title:</label>
+                  <input type="text" class="form-control" id="title" placeholder="Enter title" name="title">
+                </div>
+              </br>
+                <div class="form-group">
+                  <label for="description">Description:</label>
+                    <textarea class="form-control" name="description"></textarea>
+                </div>
+              </br>                
+              <div class="form-group">
+                <label for="title">Due Date</label>
+                <input type="date" class="form-control" id="due_date" placeholder="" name="due_date">
+              </div>
+            </br>
+            <div class="form-group">
+              <label for="title">Priority</label>
+              <input type="text" class="form-control" id="priority" placeholder=" " name="priority">
+            </div>
+          </br>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select class="form-control" id="category" name="category">
+                <option value="urgent">Urgent</option>
+                <option value="personal">Personal</option>
+                <option value="work">Work</option>
+            </select>
+        </div>
+          
+        </br>
+            <button type="submit" class="btn btn-dark">Submit</button>
+
+              </form>
+          </div>
+      </div>
+    </br>
+
+<!-- Category Filter Dropdown -->
+<div class="container">
+  <form method="GET" action="{% url 'todo_list' %}">
+    <div class="form-group">
+      <label for="category">Filter by Category:</label>
+
+      <select class="form-control" id="category" name="category">
+        <option value="">All Categories</option>
+        <option value="urgent">Urgent</option>
+        <option value="personal">Personal</option>
+        <option value="work">Work</option>
+      </select>
+
+    </br>
+
+      <label for="sort_by">Sort By:</label>
+
+      <select class="form-control" id="sort_by" name="sort_by">
+        <option value=""></option>
+        <option value="due_date_desc">Due Date (High to Low)</option>
+        <option value="due_date_asc">Due Date (Low to High)</option>
+        <option value="priority_desc">Priority (High to Low)</option>
+        <option value="priority_asc">Priority (Low to High)</option>
+      </select>
+
+    </div>
+  </br>
+    <button type="submit" class="btn btn-dark ">Filter</button>
+  </form>
+</div>
+
+</br>
+
+{% comment %} Search box {% endcomment %}
+
+  {% comment %} <label for="search">Search by title</label> {% endcomment %}
+<div id="autocomplete" class="autocomplete" >
+  <input class="autocomplete-input" style="width:50% " />
+  <ul class="autocomplete-result-list"></ul>
+</div> 
+
+
+</br>
+
+
+      {% comment %} Table for displaying history/actions {% endcomment %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">SNo</th>
+            <th scope="col">Title</th>
+            <th scope="col">Description</th>
+            <th scope="col">Due Date</th>
+            <th scope="col">Priority</th>
+            <th scope="col">Category</th>
+
+            <th scope="col">Action(s)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for todo in todos %}
+          <tr>
+            <td >{{ forloop.counter }}</td>
+
+            {% comment %} fetches title and description from todos and todos fetches from the Todo class defined in the models class{% endcomment %}
+            <td>{{ todo.title }}</td> 
+            <td>{{ todo.desciption }}</td>
+            <td>{{ todo.due_date|date:"d M Y" }}</td>
+            <td>{{ todo.priority }}</td>
+            <td>{{ todo.category.name }}</td>
+            <td> <a class="btn btn-sm btn-dark"  href="{% url 'edit_task' todo.id %}">Edit Task</a>
+
+            <td> 
+              {% if todo.completed %}
+              <span class="btn btn-sm btn-success">Completed</span>
+              {% else %}
+              <a class="btn btn-sm btn-dark"  href="{% url 'complete_todo' todo.id %}">Complete Todo</a>
+              {% endif %}
+              <a class="btn btn-sm btn-danger"  href="{% url 'delete_todo' todo.id %}">Delete Todo</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+  </div>
+
+   <script>
+
+      
+     new Autocomplete('#autocomplete', {
+      // function that runs when user types something in the searchbox
+      search : input => {
+        console.log(input)
+        const url = `/get_title/?search=${input}`
+        return new Promise(resolve => {
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              console.log(data.payload)
+              resolve(data.payload)
+            })
+        })
+      },
+
+      // how each result should be displayed in the dropdown list
+      renderResult : (result , props) => {
+        console.log(props)
+        let group = ''
+        if (result.index % 3 == 0){
+            group = `<li class="group">Group</li>`
+        }
+        return `
+        ${group}
+        <li ${props}>
+          <div class="wiki-title">
+          ${result.title}
+          </div>
+          </li>`
+      },
+      getResultValue: result => result.title, 
+
+      onSubmit: result => {
+        console.log('Selected:', result);
+
+        
+        const url = `/todo/?title=${result.title}`
+        //window.location.href =   // Redirect to the filtered task list
+
+
+      }
+    }) 
+
+  </script> 
+
+
+  </body>
+</html>

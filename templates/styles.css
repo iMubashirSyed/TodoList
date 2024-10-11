@@ -1,0 +1,35 @@
+/* Style for the input field */
+.autocomplete-input {
+  width: 50%;
+  padding: 8px;
+  font-size: 16px;
+}
+
+/* Style for the dropdown suggestion list */
+.autocomplete-result-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 8px;
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 50%;
+  background-color: white;
+}
+
+/* Style for each suggestion item */
+.autocomplete-result-list li {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+
+.autocomplete-result-list li:hover {
+  background-color: #f0f0f0;
+}
+
+/* Optional: Grouping style */
+.group {
+  font-weight: bold;
+  margin: 8px 0;
+}
