@@ -106,11 +106,16 @@
 {% comment %} Search box {% endcomment %}
 
   {% comment %} <label for="search">Search by title</label> {% endcomment %}
-<div id="autocomplete" class="autocomplete" >
-  <input class="autocomplete-input" style="width:50% " />
+ <div id="autocomplete" class="autocomplete" >
+  {% comment %} <form method="GET" action="{% url 'todo_list' %}">
+    <input type="text" name="search" placeholder="Search tasks">
+    </br>
+    <button type="submit" class="btn btn-dark ">submit</button>
+  </form> {% endcomment %}
+
+  <input class="autocomplete-input" style="width:50% " name="search_by"/>
   <ul class="autocomplete-result-list"></ul>
 </div> 
-
 
 </br>
 
@@ -163,13 +168,14 @@
      new Autocomplete('#autocomplete', {
       // function that runs when user types something in the searchbox
       search : input => {
-        console.log(input)
-        const url = `/get_title/?search=${input}`
+        console.log("input", input);
+        const url = `/todo/?search=${input}`
         return new Promise(resolve => {
           fetch(url)
             .then(response => response.json())
             .then(data => {
-              console.log(data.payload)
+              const results = document.getElementById('results');
+              results.innerHTML = data.html;
               resolve(data.payload)
             })
         })
@@ -177,7 +183,6 @@
 
       // how each result should be displayed in the dropdown list
       renderResult : (result , props) => {
-        console.log(props)
         let group = ''
         if (result.index % 3 == 0){
             group = `<li class="group">Group</li>`

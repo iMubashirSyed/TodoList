@@ -5,7 +5,6 @@ from .models import Task, Category
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-
     
 @login_required(login_url='login')
 def todoList(request):
@@ -22,6 +21,12 @@ def todoList(request):
         todos = todos.filter(category__name=selected_category)
     
     sort_by = request.GET.get('sort_by')
+    search = request.GET.get('search')
+    # print(f'search {search}')
+    
+    if search:
+        todos = todos.filter(title__startswith=search)
+        print(f'todos {todos}')
     
     if sort_by == 'due_date_desc':
         todos = todos.order_by('-due_date')
@@ -142,10 +147,11 @@ def get_title(request):
     
     search = request.GET.get('search','')
     payload = []
-    
+
     if search:
         objs = Task.objects.filter(user=request.user,title__startswith=search)
         for obj in objs:
+            print(f"obj {obj}")
             payload.append({
                 "title": obj.title
             })
@@ -154,27 +160,4 @@ def get_title(request):
         "status": True,
         "payload": payload
     })
-
-@login_required(login_url='login')
-def get_title(request):
-    search = request.GET.get('search', '')
-    payload = []
-
-    if search:
-        # Filter tasks based on user and title containing the search string
-        objs = Task.objects.filter(user=request.user, title__startswith=search)
-        for obj in objs:
-            payload.append({
-                "title": obj.title
-            })
-        
-    return JsonResponse({
-        "status": True,
-        "payload": payload
-    })
-
-        
-    
-
-
  
