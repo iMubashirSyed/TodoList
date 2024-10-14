@@ -105,17 +105,29 @@
 
 {% comment %} Search box {% endcomment %}
 
-  {% comment %} <label for="search">Search by title</label> {% endcomment %}
- <div id="autocomplete" class="autocomplete" >
-  {% comment %} <form method="GET" action="{% url 'todo_list' %}">
-    <input type="text" name="search" placeholder="Search tasks">
+   {% comment %} <label for="search">Search by title</label> 
+  <div id="autocomplete" class="autocomplete" >
+   <form method="GET" action="{% url 'todo_list' %}">
+    <input style="width:50%" type="text" name="search" placeholder="Search tasks" >
     </br>
-    <button type="submit" class="btn btn-dark ">submit</button>
-  </form> {% endcomment %}
+    <button style="margin:10px;padding:10px" type="submit" class="btn btn-sm btn-dark ">submit</button>
+  </form>   {% endcomment %}
+  
+  {% comment %}  {% endcomment %}
 
-  <input class="autocomplete-input" style="width:50% " name="search_by"/>
+ {% comment %} <input class="autocomplete-input" style="width:50% " name="search"/>
   <ul class="autocomplete-result-list"></ul>
-</div> 
+</div>    {% endcomment %}
+
+<form method="GET" action="{% url 'todo_list' %}">
+  <input 
+    type="text" 
+    name="search" 
+    placeholder="Search tasks..." 
+    value="{{ search_query }}" 
+    oninput="this.form.submit()"  {% comment %} Autosubmits the form on each input. {% endcomment %}
+  >
+</form>
 
 </br>
 
@@ -162,9 +174,9 @@
       
   </div>
 
-   <script>
 
-      
+   {% comment %} <script>
+    
      new Autocomplete('#autocomplete', {
       // function that runs when user types something in the searchbox
       search : input => {
@@ -199,17 +211,27 @@
 
       onSubmit: result => {
         console.log('Selected:', result);
-
         
         const url = `/todo/?title=${result.title}`
         //window.location.href =   // Redirect to the filtered task list
 
-
       }
     }) 
 
-  </script> 
+  </script>  {% endcomment %}
 
+  {% comment %} <script>
+  // JSON data passed from the Django view
+  var todosData = {{ todos_json|safe }};
+
+  // Now you can use `todosData` in JavaScript
+  console.log('Todos in JSON format:', todosData);
+  
+  // Example: display todos in console
+  todosData.forEach(todo => {
+      console.log(`Title: ${todo.title}, Due Date: ${todo.due_date}`);
+  });
+</script>  {% endcomment %}
 
   </body>
 </html>
