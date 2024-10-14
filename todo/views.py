@@ -5,9 +5,6 @@ from .models import Task, Category
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-import json    
-from django.core.serializers import serialize
-
 
 @login_required(login_url='login')
 def todoList(request):
@@ -26,17 +23,18 @@ def todoList(request):
     sort_by = request.GET.get('sort_by')
     # search = request.GET.get('search')
     # print(f'search {search}')
-    
     # if search:
     #     todos = todos.filter(title__startswith=search)
     #     print(f'todos {todos}')
-    
 
     search_query = request.GET.get('search', '')
     if search_query:
         # Filter tasks based on the search query
         todos = todos.filter(title__startswith=search_query)
-
+        
+    if request.headers.get('HX-Request') == 'true':
+        # Return only the partial template
+        return render(request, 'todo_list.html', {'todos': todos})
     
     if sort_by == 'due_date_desc':
         todos = todos.order_by('-due_date')
@@ -46,10 +44,6 @@ def todoList(request):
         todos = todos.order_by('priority')
     elif sort_by == 'priority_desc':
         todos = todos.order_by('-priority')
-        
-
-    # todos_list = list(todos.values('title', 'due_date', 'priority', 'category__name'))
-    # todos_json = serialize('json', todos)
 
     return render(request, 'index.html', {'todos': todos, 'search_query': search_query})
     
