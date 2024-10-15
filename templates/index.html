@@ -77,7 +77,7 @@
 
 <!-- Category Filter Dropdown -->
 <div class="container">
-  <form method="GET" action="{% url 'todo_list' %}">
+  <form method="GET" action="{% url 'todo_list' %}"> <!-- The action is used to send form's data on the beckend-->
     <div class="form-group">
       <label for="category">Filter by Category:</label>
 
@@ -107,7 +107,6 @@
 </div>
 
 </br>
-
 {% comment %} Search box {% endcomment %}
 
    {% comment %} <label for="search">Search by title</label> 
@@ -134,6 +133,11 @@
   >
 </form>
  {% endcomment %}
+
+  <div>
+    {% include 'form.html' %}
+  </div>
+</br>
 
  <form method="GET" action="{% url 'todo_list' %}">
   <input 

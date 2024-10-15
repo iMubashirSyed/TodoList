@@ -4,7 +4,10 @@ from django.contrib import messages
 from .models import Task, Category
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from .forms import UploadFileForm
+from datetime import datetime
+import csv
+import io
 
 @login_required(login_url='login')
 def todoList(request):
@@ -26,6 +29,24 @@ def todoList(request):
     # if search:
     #     todos = todos.filter(title__startswith=search)
     #     print(f'todos {todos}')
+    if request.method == 'POST':
+        file = request.FILES['file']        
+    
+        decoded_file = io.TextIOWrapper(file.file, encoding="utf-8")
+        reader = csv.reader(decoded_file, delimiter=",")
+        # print(reader)
+        
+        for row in reader:
+            title = row[0]        
+            description = row[1]
+            due_date = row[2]
+            priority = row[3]
+            category = row[4]
+            category = Category.objects.create(name=category)
+            due_date = datetime.strptime(due_date, "%Y-%m-%d %H:%M:%S")
+            Task.objects.create(user=request.user, title=title, desciption = description, priority=priority, due_date=due_date, category=category)
+        
+        return redirect('todo_list')
 
     search_query = request.GET.get('search', '')
     if search_query:
@@ -60,6 +81,27 @@ def create_todo(request):
         Task.objects.create(user=request.user, title=title, desciption=description, priority=priority, due_date=due_date, category=category)
         
     return redirect('todo_list')
+
+def upload_form(request):
+    if request.method == 'POST':
+        file = request.FILES['file']
+        
+        decoded_file = file.read().decode('utf-8')
+        reader = csv.reader(file, delimiter=",")
+        # print(reader)
+        
+        for row in reader:
+            title = row[0]        
+            description = row[1]
+            due_date = row[2]
+            priority = row[3]
+            category = row[4]
+            category = Category.objects.create(name=category)
+            Task.objects.create(user=request.user, title=title, desciption = description, priority=priority, due_date=due_date, category=category)
+        
+        return redirect('todo_list')
+    
+    return render(request,'index.html')
 
 @login_required(login_url='login')
 def complete_todo(request, todo_id):
