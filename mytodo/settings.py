@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'todo'
+    'todo',
+    'django_celery_beat',
+    # 'django_celery_results'
 ]
 
 MIDDLEWARE = [
@@ -125,3 +127,27 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# celery settings
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Karachi'
+
+# CELERY_RESULT_BACKEND = 'django-db'
+
+# celery beat settings
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# settings.py
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Use SMTP backend
+EMAIL_HOST = 'smtp.gmail.com'  # Replace with your email provider's SMTP server
+EMAIL_PORT = 587  # Commonly used port for TLS
+EMAIL_USE_TLS = True  # Use TLS for security
+EMAIL_HOST_USER = 'studypurpose220904@gmail.com'  # Your email address
+EMAIL_HOST_PASSWORD = 'hnqg hmbc oedz znmh'  # Your email password
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = 'Celery <studypurpose220904@gmail.com>'

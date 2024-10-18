@@ -5,7 +5,8 @@ from .models import Task, Category
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UploadFileForm
-from datetime import datetime
+from datetime import datetime, timedelta
+from .tasks import send_task_reminder
 import csv
 import io
 
@@ -29,6 +30,8 @@ def todoList(request):
     # if search:
     #     todos = todos.filter(title__startswith=search)
     #     print(f'todos {todos}')
+    
+    # CSV file input code
     if request.method == 'POST':
         file = request.FILES['file']        
     
@@ -65,6 +68,10 @@ def todoList(request):
         todos = todos.order_by('priority')
     elif sort_by == 'priority_desc':
         todos = todos.order_by('-priority')
+    
+    # for task in todos:
+        # reminder_time = task.due_date - timedelta(days=1)
+        # send_task_reminder.apply_async((task.id,), eta=reminder_time)
 
     return render(request, 'index.html', {'todos': todos, 'search_query': search_query})
     
@@ -78,30 +85,32 @@ def create_todo(request):
         due_date = request.POST.get('due_date')
         category = request.POST.get('category')
         category = Category.objects.create(name=category)
-        Task.objects.create(user=request.user, title=title, desciption=description, priority=priority, due_date=due_date, category=category)
+        task = Task.objects.create(user=request.user, title=title, desciption=description, priority=priority, due_date=due_date, category=category)
         
+        send_task_reminder.delay(task.id)
+
     return redirect('todo_list')
 
-def upload_form(request):
-    if request.method == 'POST':
-        file = request.FILES['file']
+# def upload_form(request):
+#     if request.method == 'POST':
+#         file = request.FILES['file']
         
-        decoded_file = file.read().decode('utf-8')
-        reader = csv.reader(file, delimiter=",")
-        # print(reader)
+#         decoded_file = file.read().decode('utf-8')
+#         reader = csv.reader(file, delimiter=",")
+#         # print(reader)
         
-        for row in reader:
-            title = row[0]        
-            description = row[1]
-            due_date = row[2]
-            priority = row[3]
-            category = row[4]
-            category = Category.objects.create(name=category)
-            Task.objects.create(user=request.user, title=title, desciption = description, priority=priority, due_date=due_date, category=category)
+#         for row in reader:
+#             title = row[0]        
+#             description = row[1]
+#             due_date = row[2]
+#             priority = row[3]
+#             category = row[4]
+#             category = Category.objects.create(name=category)
+#             Task.objects.create(user=request.user, title=title, desciption = description, priority=priority, due_date=due_date, category=category)
         
-        return redirect('todo_list')
+#         return redirect('todo_list')
     
-    return render(request,'index.html')
+#     return render(request,'index.html')
 
 @login_required(login_url='login')
 def complete_todo(request, todo_id):
@@ -119,13 +128,14 @@ def delete_todo(request, todo_id):
 def login_page(request):
     if request.method == "POST":
         username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
 
-        if not User.objects.filter(username=username).exists():
+        if not User.objects.filter(username=username, email=email).exists():
             messages.error(request,"Invalid username or password")
             return redirect('login')
         
-        user = authenticate(username = username, password= password) # verifies and returns a User Object with credentials
+        user = authenticate(username = username, email = email, password= password) # verifies and returns a User Object with credentials
 
         if user is None:    # Checks again for the returned User Object
             messages.error(request,"Invalid Credentials")
@@ -141,15 +151,16 @@ def login_page(request):
 def register(request):
     if request.method == "POST":
         username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
         
-        user = User.objects.filter(username = username)
+        user = User.objects.filter(username = username, email = email)
         
         if user.exists():
             messages.info(request, "User already taken")
             return redirect('register')
         
-        user = User.objects.create_user(username=username)
+        user = User.objects.create_user(username=username, email = email)
         user.set_password(password)
         user.save()
         
@@ -192,22 +203,22 @@ def edit_task(request, todo_id):
     
     return render(request, 'edit.html', {'task':task})
 
-@login_required(login_url='login')
-def get_title(request):
+# @login_required(login_url='login')
+# def get_title(request):
     
-    search = request.GET.get('search','')
-    payload = []
+#     search = request.GET.get('search','')
+#     payload = []
 
-    if search:
-        objs = Task.objects.filter(user=request.user,title__startswith=search)
-        for obj in objs:
-            print(f"obj {obj}")
-            payload.append({
-                "title": obj.title
-            })
+#     if search:
+#         objs = Task.objects.filter(user=request.user,title__startswith=search)
+#         for obj in objs:
+#             print(f"obj {obj}")
+#             payload.append({
+#                 "title": obj.title
+#             })
         
-    return JsonResponse({
-        "status": True,
-        "payload": payload
-    })
+#     return JsonResponse({
+#         "status": True,
+#         "payload": payload
+#     })
  

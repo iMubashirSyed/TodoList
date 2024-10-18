@@ -12,6 +12,6 @@ urlpatterns = [
     path('create', views.create_todo,name="create_todo"),
     path('complete/<int:todo_id>', views.complete_todo,name="complete_todo"),
     path('delete/<int:todo_id>', views.delete_todo,name="delete_todo"),
-    path('get_title/', views.get_title,name="get_title"),
-    path('upload_form',views.upload_form,name="upload_form"),
+    # path('get_title/', views.get_title,name="get_title"),
+    # path('upload_form',views.upload_form,name="upload_form"),
 ]
