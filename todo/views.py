@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import UploadFileForm
 from datetime import datetime, timedelta
 from .tasks import send_task_reminder
+from django.utils import timezone
 import csv
 import io
 
@@ -69,9 +70,12 @@ def todoList(request):
     elif sort_by == 'priority_desc':
         todos = todos.order_by('-priority')
     
+    # For sending emails to the user
     # for task in todos:
-        # reminder_time = task.due_date - timedelta(days=1)
-        # send_task_reminder.apply_async((task.id,), eta=reminder_time)
+    #     reminder_time = task.due_date - timedelta(days=1)   # Calculate the reminder time: 1 day before the due date
+    #     # now = timezone.now()
+    #     # if reminder_time > now:
+    #     send_task_reminder.apply_async((task.id,), eta=reminder_time) # eta = estimated time of arrival
 
     return render(request, 'index.html', {'todos': todos, 'search_query': search_query})
     
@@ -87,7 +91,8 @@ def create_todo(request):
         category = Category.objects.create(name=category)
         task = Task.objects.create(user=request.user, title=title, desciption=description, priority=priority, due_date=due_date, category=category)
         
-        send_task_reminder.delay(task.id)
+        # An email will be sent when a user creates a new task.
+        # send_task_reminder.delay(task.id)
 
     return redirect('todo_list')
 
