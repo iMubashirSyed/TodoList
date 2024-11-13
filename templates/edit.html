@@ -26,7 +26,7 @@
             </br>                
             <div class="form-group">
               <label for="title">Due Date</label>
-              <input type="date" class="form-control" value={{task.due_date|date:"Y-m-d"}} id="due_date" placeholder="" name="due_date">
+              <input type="datetime-local" class="form-control" value="{{due_date_formatted}}" id="due_date" placeholder="" name="due_date">
             </div>
           </br>
           <div class="form-group">

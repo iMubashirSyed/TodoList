@@ -30,7 +30,7 @@
         {% comment %} fetches title and description from todos and todos fetches from the Todo class defined in the models class{% endcomment %}
         <td>{{ todo.title }}</td> 
         <td>{{ todo.desciption }}</td>
-        <td>{{ todo.due_date|date:"d M Y" }}</td>
+        <td>{{ todo.due_date }}</td>
         <td>{{ todo.priority }}</td>
         <td>{{ todo.category.name }}</td>
         <td> <a class="btn btn-sm btn-dark"  href="{% url 'edit_task' todo.id %}">Edit Task</a>

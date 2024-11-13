@@ -135,6 +135,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Karachi'
 
+
 # CELERY_RESULT_BACKEND = 'django-db'
 
 # celery beat settings
@@ -151,3 +152,6 @@ EMAIL_HOST_USER = 'studypurpose220904@gmail.com'  # Your email address
 EMAIL_HOST_PASSWORD = 'hnqg hmbc oedz znmh'  # Your email password
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'Celery <studypurpose220904@gmail.com>'
+
+TIME_ZONE = 'Asia/Karachi' 
+USE_TZ = True 

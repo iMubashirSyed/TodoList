@@ -13,6 +13,8 @@ class Task(models.Model):
     priority = models.IntegerField(default=1)
     completed = models.BooleanField(default=False) # by default it is set to  False
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank= True, null=True)
+    reminder_sent = models.BooleanField(default=False)  # This field tracks if reminder has been sent
+
     
 
     

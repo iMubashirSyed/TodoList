@@ -6,8 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UploadFileForm
 from datetime import datetime, timedelta
-from .tasks import send_task_reminder
-from django.utils import timezone
+# from .tasks import send_task_reminder
+from django.utils.timezone import localtime
 import csv
 import io
 
@@ -89,6 +89,7 @@ def create_todo(request):
         due_date = request.POST.get('due_date')
         category = request.POST.get('category')
         category = Category.objects.create(name=category)
+
         task = Task.objects.create(user=request.user, title=title, desciption=description, priority=priority, due_date=due_date, category=category)
         
         # An email will be sent when a user creates a new task.
@@ -165,8 +166,8 @@ def register(request):
             messages.info(request, "User already taken")
             return redirect('register')
         
-        user = User.objects.create_user(username=username, email = email)
-        user.set_password(password)
+        user = User.objects.create_user(username=username, email = email, password=password)
+        # user.set_password(password)
         user.save()
         
         messages.info(request,"Account created successfully")
@@ -195,6 +196,7 @@ def edit_task(request, todo_id):
         # category = request.POST.get('category')
         category_name = request.POST.get('category')
         categories = Category.objects.filter(name=category_name)
+        # due_date_formatted = localtime(task.due_date).strftime('%Y-%m-%dT%H:%M')
 
         if categories.exists():
             category = categories.first()  # Get the first category found
@@ -206,7 +208,10 @@ def edit_task(request, todo_id):
         task.save()
         return redirect('todo_list')
     
-    return render(request, 'edit.html', {'task':task})
+    if task.due_date:
+        due_date_formatted = localtime(task.due_date).strftime('%Y-%m-%dT%H:%M')
+
+    return render(request, 'edit.html', {'task':task, 'due_date_formatted':due_date_formatted})
 
 # @login_required(login_url='login')
 # def get_title(request):
